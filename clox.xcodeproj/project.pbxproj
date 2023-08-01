@@ -16,6 +16,7 @@
 		872E42BF2A37751E00236C91 /* scanner.c in Sources */ = {isa = PBXBuildFile; fileRef = 872E42AF2A37751D00236C91 /* scanner.c */; };
 		872E42C02A37751E00236C91 /* vm.c in Sources */ = {isa = PBXBuildFile; fileRef = 872E42B22A37751D00236C91 /* vm.c */; };
 		872E42C22A37751E00236C91 /* memory.c in Sources */ = {isa = PBXBuildFile; fileRef = 872E42B62A37751E00236C91 /* memory.c */; };
+		8756884A2A79068300A0E09A /* direct_threaded_vm.c in Sources */ = {isa = PBXBuildFile; fileRef = 875688492A79068300A0E09A /* direct_threaded_vm.c */; };
 		87B2C2BF2A4F2F200014D033 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 87B2C2BE2A4F2F200014D033 /* main.c */; };
 /* End PBXBuildFile section */
 
@@ -52,6 +53,8 @@
 		872E42B62A37751E00236C91 /* memory.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = memory.c; sourceTree = "<group>"; };
 		872E42B72A37751E00236C91 /* chunk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chunk.h; sourceTree = "<group>"; };
 		872E42B82A37751E00236C91 /* memory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = memory.h; sourceTree = "<group>"; };
+		875688482A79068300A0E09A /* direct_threaded_vm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = direct_threaded_vm.h; sourceTree = "<group>"; };
+		875688492A79068300A0E09A /* direct_threaded_vm.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = direct_threaded_vm.c; sourceTree = "<group>"; };
 		87B2C2BE2A4F2F200014D033 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -103,6 +106,8 @@
 				872E42A92A37751D00236C91 /* value.c */,
 				872E42A52A37751D00236C91 /* value.h */,
 				872E42B22A37751D00236C91 /* vm.c */,
+				875688482A79068300A0E09A /* direct_threaded_vm.h */,
+				875688492A79068300A0E09A /* direct_threaded_vm.c */,
 				872E42B52A37751E00236C91 /* vm.h */,
 				87B2C2BE2A4F2F200014D033 /* main.c */,
 			);
@@ -174,6 +179,7 @@
 				872E42BD2A37751E00236C91 /* chunk.c in Sources */,
 				872E42BB2A37751E00236C91 /* debug.c in Sources */,
 				872E42C22A37751E00236C91 /* memory.c in Sources */,
+				8756884A2A79068300A0E09A /* direct_threaded_vm.c in Sources */,
 				872E42C02A37751E00236C91 /* vm.c in Sources */,
 				872E42BC2A37751E00236C91 /* compiler.c in Sources */,
 			);
