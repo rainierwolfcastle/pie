@@ -2,6 +2,10 @@
 
 Yet another implementation of clox from the [Crafting Interpreters](http://www.craftinginterpreters.com/) book.
 
+## How to run
+
+Open the project file in Xcode.
+
 ## Benchmarks
 
 ### Fibonacci
