@@ -12,8 +12,8 @@ Open the project file in Xcode.
 
 Calculate the the 40th Fibonacci number using a recursive function. All times are the average over five runs and in seconds.
 
-| C    | Python | Switch dispatch [^1] | Direct threaded dispatch      |
-| ---- | ------ | -------------------- | ----------------------------- |
-| 3.20 | 11.02  | 10.85                | 8.71                          |
+| C    | Python | Ruby | Switch dispatch [^1] | Direct threaded dispatch      |
+| ---- | ------ | ---- | -------------------- | ----------------------------- |
+| 3.20 | 11.02  | 8.65 | 10.85                | 8.71                          |
 
 [^1]: Final code from the book.
