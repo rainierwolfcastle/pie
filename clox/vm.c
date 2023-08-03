@@ -77,21 +77,21 @@ void free_vm(void) {
     free_objects();
 }
 
-void push(Value value) {
+inline void push(Value value) {
     *vm.stack_top = value;
     vm.stack_top++;
 }
 
-Value pop(void) {
+inline Value pop(void) {
     vm.stack_top--;
     return *vm.stack_top;
 }
 
-static Value peek(int distance) {
+inline static Value peek(int distance) {
     return vm.stack_top[-1 - distance];
 }
 
-static bool call(ObjClosure *closure, int arg_count) {
+inline static bool call(ObjClosure *closure, int arg_count) {
     if (arg_count != closure->function->arity) {
         runtime_error("Expected %d arguments but got %d.", closure->function->arity, arg_count);
         return false;
@@ -109,7 +109,7 @@ static bool call(ObjClosure *closure, int arg_count) {
     return true;
 }
 
-static bool call_value(Value callee, int arg_count) {
+inline static bool call_value(Value callee, int arg_count) {
     if (IS_OBJ(callee)) {
         switch (OBJ_TYPE(callee)) {
             case OBJ_BOUND_METHOD: {
@@ -147,7 +147,7 @@ static bool call_value(Value callee, int arg_count) {
     return false;
 }
 
-static bool invoke_from_class(ObjClass *klass, ObjString *name, int arg_count) {
+inline static bool invoke_from_class(ObjClass *klass, ObjString *name, int arg_count) {
     Value method;
     if (!table_get(&klass->methods, name, &method)) {
         runtime_error("Undefined property '%s'.", name->chars);
@@ -156,7 +156,7 @@ static bool invoke_from_class(ObjClass *klass, ObjString *name, int arg_count) {
     return call(AS_CLOSURE(method), arg_count);
 }
 
-static bool invoke(ObjString *name, int arg_count) {
+inline static bool invoke(ObjString *name, int arg_count) {
     Value receiver = peek(arg_count);
     
     if (!IS_INSTANCE(receiver)) {
@@ -175,7 +175,7 @@ static bool invoke(ObjString *name, int arg_count) {
     return invoke_from_class(instance->klass, name, arg_count);
 }
 
-static bool bind_method(ObjClass *klass, ObjString *name) {
+inline static bool bind_method(ObjClass *klass, ObjString *name) {
     Value method;
     if (!table_get(&klass->methods, name, &method)) {
         runtime_error("Undefined property '%s'.", name->chars);
@@ -188,7 +188,7 @@ static bool bind_method(ObjClass *klass, ObjString *name) {
     return true;
 }
 
-static ObjUpvalue* capture_upvalue(Value *local) {
+inline static ObjUpvalue* capture_upvalue(Value *local) {
     ObjUpvalue *prev_upvalue = NULL;
     ObjUpvalue *upvalue = vm.open_upvalues;
     while (upvalue != NULL && upvalue->location > local) {
@@ -212,7 +212,7 @@ static ObjUpvalue* capture_upvalue(Value *local) {
     return created_upvalue;
 }
 
-static void close_upvalues(Value *last) {
+inline static void close_upvalues(Value *last) {
     while (vm.open_upvalues != NULL && vm.open_upvalues->location >= last) {
         ObjUpvalue *upvalue = vm.open_upvalues;
         upvalue->closed = *upvalue->location;
@@ -221,18 +221,18 @@ static void close_upvalues(Value *last) {
     }
 }
 
-static void define_method(ObjString *name) {
+inline static void define_method(ObjString *name) {
     Value method = peek(0);
     ObjClass *klass = AS_CLASS(peek(1));
     table_set(&klass->methods, name, method);
     pop();
 }
 
-static bool is_falsey(Value v) {
+inline static bool is_falsey(Value v) {
     return IS_NIL(v) || (IS_BOOL(v) && !AS_BOOL(v));
 }
 
-static void concatinate(void) {
+static inline void concatinate(void) {
     ObjString *b = AS_STRING(peek(0));
     ObjString *a = AS_STRING(peek(1));
     
@@ -249,7 +249,7 @@ static void concatinate(void) {
 }
 
 static InterpretResult run(void) {
-    CallFrame *frame = &vm.frames[vm.frame_count - 1];
+    register CallFrame *frame = &vm.frames[vm.frame_count - 1];
     register uint8_t *ip = frame->ip;
 
     static void *opcodes[] = {
