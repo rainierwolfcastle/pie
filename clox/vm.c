@@ -11,17 +11,17 @@
 
 Vm vm;
 
-inline static Value clock_native(int arg_count, Value *args) {
+static Value clock_native(int arg_count, Value *args) {
     return NUMBER_VAL((double) clock() / CLOCKS_PER_SEC);
 }
 
-inline static void reset_stack(void) {
+static void reset_stack(void) {
     vm.stack_top = vm.stack;
     vm.frame_count = 0;
     vm.open_upvalues = NULL;
 }
 
-inline static void runtime_error(const char *format, ...) {
+static void runtime_error(const char *format, ...) {
     va_list args;
     va_start(args, format);
     vfprintf(stderr, format, args);
@@ -43,7 +43,7 @@ inline static void runtime_error(const char *format, ...) {
     reset_stack();
 }
 
-inline static void define_native(const char *name, NativeFn function) {
+static void define_native(const char *name, NativeFn function) {
     push(OBJ_VAL(copy_string(name, (int) strlen(name))));
     push(OBJ_VAL(new_native(function)));
     table_set(&vm.globals, AS_STRING(vm.stack[0]), vm.stack[1]);
@@ -87,11 +87,11 @@ Value pop(void) {
     return *vm.stack_top;
 }
 
-inline static Value peek(int distance) {
+static Value peek(int distance) {
     return vm.stack_top[-1 - distance];
 }
 
-inline static bool call(ObjClosure *closure, int arg_count) {
+static bool call(ObjClosure *closure, int arg_count) {
     if (arg_count != closure->function->arity) {
         runtime_error("Expected %d arguments but got %d.", closure->function->arity, arg_count);
         return false;
@@ -109,7 +109,7 @@ inline static bool call(ObjClosure *closure, int arg_count) {
     return true;
 }
 
-inline static bool call_value(Value callee, int arg_count) {
+static bool call_value(Value callee, int arg_count) {
     if (IS_OBJ(callee)) {
         switch (OBJ_TYPE(callee)) {
             case OBJ_BOUND_METHOD: {
@@ -147,7 +147,7 @@ inline static bool call_value(Value callee, int arg_count) {
     return false;
 }
 
-inline static bool invoke_from_class(ObjClass *klass, ObjString *name, int arg_count) {
+static bool invoke_from_class(ObjClass *klass, ObjString *name, int arg_count) {
     Value method;
     if (!table_get(&klass->methods, name, &method)) {
         runtime_error("Undefined property '%s'.", name->chars);
@@ -156,7 +156,7 @@ inline static bool invoke_from_class(ObjClass *klass, ObjString *name, int arg_c
     return call(AS_CLOSURE(method), arg_count);
 }
 
-inline static bool invoke(ObjString *name, int arg_count) {
+static bool invoke(ObjString *name, int arg_count) {
     Value receiver = peek(arg_count);
     
     if (!IS_INSTANCE(receiver)) {
@@ -175,7 +175,7 @@ inline static bool invoke(ObjString *name, int arg_count) {
     return invoke_from_class(instance->klass, name, arg_count);
 }
 
-inline static bool bind_method(ObjClass *klass, ObjString *name) {
+static bool bind_method(ObjClass *klass, ObjString *name) {
     Value method;
     if (!table_get(&klass->methods, name, &method)) {
         runtime_error("Undefined property '%s'.", name->chars);
@@ -188,7 +188,7 @@ inline static bool bind_method(ObjClass *klass, ObjString *name) {
     return true;
 }
 
-inline static ObjUpvalue* capture_upvalue(Value *local) {
+static ObjUpvalue* capture_upvalue(Value *local) {
     ObjUpvalue *prev_upvalue = NULL;
     ObjUpvalue *upvalue = vm.open_upvalues;
     while (upvalue != NULL && upvalue->location > local) {
@@ -212,7 +212,7 @@ inline static ObjUpvalue* capture_upvalue(Value *local) {
     return created_upvalue;
 }
 
-inline static void close_upvalues(Value *last) {
+static void close_upvalues(Value *last) {
     while (vm.open_upvalues != NULL && vm.open_upvalues->location >= last) {
         ObjUpvalue *upvalue = vm.open_upvalues;
         upvalue->closed = *upvalue->location;
@@ -221,18 +221,18 @@ inline static void close_upvalues(Value *last) {
     }
 }
 
-inline static void define_method(ObjString *name) {
+static void define_method(ObjString *name) {
     Value method = peek(0);
     ObjClass *klass = AS_CLASS(peek(1));
     table_set(&klass->methods, name, method);
     pop();
 }
 
-inline static bool is_falsey(Value v) {
+static bool is_falsey(Value v) {
     return IS_NIL(v) || (IS_BOOL(v) && !AS_BOOL(v));
 }
 
-inline static void concatinate(void) {
+static void concatinate(void) {
     ObjString *b = AS_STRING(peek(0));
     ObjString *a = AS_STRING(peek(1));
     
