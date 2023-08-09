@@ -20,6 +20,8 @@ Calculate the the 40th Fibonacci number using a recursive function. Times are ga
 | Clox [^1]                             | 10.880     | 0.007   | 10.870      | 10.890      |
 | Clox - Optimised switch dispatch [^2] | 10.746     | 0.024   | 10.725      | 10.788      |
 | Clox - No NaN boxing                  | 12.048     | 0.093   | 11.904      | 12.127      |
+| Clox - New instructions [^3]          | 10.104     | 0.027   | 10.074      | 10.136      |
 
 [^1]: Final code from the book.
 [^2]: https://github.com/rainierwolfcastle/pie/tree/switch-dispatch-speedups
+[^3]: https://github.com/rainierwolfcastle/pie/tree/new-instructions
