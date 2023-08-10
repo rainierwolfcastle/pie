@@ -288,6 +288,18 @@ static InterpretResult run(void) {
             case OP_TRUE: push(BOOL_VAL(true)); break;
             case OP_FALSE: push(BOOL_VAL(false)); break;
             case OP_POP: pop(); break;
+            case OP_GET_LOCAL_0:
+            case OP_GET_LOCAL_1:
+            case OP_GET_LOCAL_2:
+            case OP_GET_LOCAL_3:
+            case OP_GET_LOCAL_4:
+            case OP_GET_LOCAL_5:
+            case OP_GET_LOCAL_6:
+            case OP_GET_LOCAL_7:
+            case OP_GET_LOCAL_8: {
+                push(frame->slots[1]);
+                break;
+            }
             case OP_GET_LOCAL: {
                 uint8_t slot = READ_BYTE();
                 push(frame->slots[slot]);
@@ -431,6 +443,13 @@ static InterpretResult run(void) {
             case OP_CALL: {
                 int arg_count = READ_BYTE();
                 if (!call_value(peek(arg_count), arg_count)) {
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                frame = &vm.frames[vm.frame_count - 1];
+                break;
+            }
+            case OP_CALL_1: {
+                if (!call_value(peek(1), 1)) {
                     return INTERPRET_RUNTIME_ERROR;
                 }
                 frame = &vm.frames[vm.frame_count - 1];

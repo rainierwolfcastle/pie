@@ -418,7 +418,10 @@ static void binary(bool can_assign) {
 
 static void call(bool can_assign) {
     uint8_t arg_count = argument_list();
-    emit_bytes(OP_CALL, arg_count);
+    switch (arg_count) {
+        case 1: emit_byte(OP_CALL_1); break;
+        default: emit_bytes(OP_CALL, arg_count); break;
+    }
 }
 
 static void dot(bool can_assign) {
@@ -490,7 +493,11 @@ static void named_variable(Token name, bool can_assign) {
         expression();
         emit_bytes(set_op, (uint8_t) arg);
     } else {
-        emit_bytes(get_op, (uint8_t) arg);
+        if (get_op == OP_GET_LOCAL && arg == 1) {
+            emit_byte(OP_GET_LOCAL_1);
+        } else {
+            emit_bytes(get_op, (uint8_t) arg);
+        }
     }
 }
 
