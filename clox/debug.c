@@ -67,24 +67,8 @@ int disassemble_instruction(Chunk *chunk, int offset) {
             return simple_instruction("OP_FALSE", offset);
         case OP_POP:
             return simple_instruction("OP_POP", offset);
-        case OP_GET_LOCAL_0:
-            return simple_instruction("OP_GET_LOCAL_0", offset);
         case OP_GET_LOCAL_1:
             return simple_instruction("OP_GET_LOCAL_1", offset);
-        case OP_GET_LOCAL_2:
-            return simple_instruction("OP_GET_LOCAL_2", offset);
-        case OP_GET_LOCAL_3:
-            return simple_instruction("OP_GET_LOCAL_3", offset);
-        case OP_GET_LOCAL_4:
-            return simple_instruction("OP_GET_LOCAL_4", offset);
-        case OP_GET_LOCAL_5:
-            return simple_instruction("OP_GET_LOCAL_5", offset);
-        case OP_GET_LOCAL_6:
-            return simple_instruction("OP_GET_LOCAL_6", offset);
-        case OP_GET_LOCAL_7:
-            return simple_instruction("OP_GET_LOCAL_7", offset);
-        case OP_GET_LOCAL_8:
-            return simple_instruction("OP_GET_LOCAL_8", offset);
         case OP_GET_LOCAL:
             return byte_instruction("OP_GET_LOCAL", chunk, offset);
         case OP_SET_LOCAL:
