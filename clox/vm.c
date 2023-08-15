@@ -507,6 +507,33 @@ static InterpretResult run(void) {
             case OP_METHOD:
                 define_method(READ_STRING());
                 break;
+            case OP_NEW_LIST: {
+                ObjList *list = new_list();
+                push(OBJ_VAL(list));
+                break;
+            }
+            case OP_LIST_APPEND: {
+                Value value = pop();
+                ObjList *list = AS_LIST(pop());
+                write_value_array(&list->values, value);
+                push(OBJ_VAL(list));
+                break;
+            }
+            case OP_LIST_SUBSCRIPT_LOAD: {
+                int index = AS_NUMBER(pop());
+                ObjList *list = AS_LIST(pop());
+                push(list->values.values[index]);
+                break;
+            }
+            case OP_LIST_SUBSCRIPT_STORE: {
+                Value value = pop();
+                int index = AS_NUMBER(pop());
+                ObjList *list = AS_LIST(pop());
+                list->values.values[index] = value;
+                // Lox is expecting something to be on the stack.
+                push(value);
+                break;
+            }
         }
     }
 

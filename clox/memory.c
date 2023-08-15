@@ -111,6 +111,8 @@ static void blacken_object(Obj *object) {
         case OBJ_NATIVE:
         case OBJ_STRING:
             break;
+        case OBJ_LIST:
+            break;
     }
 }
 
@@ -161,6 +163,8 @@ static void free_object(Obj *object) {
             FREE(ObjUpvalue, object);
             break;
         }
+        case OBJ_LIST:
+            break;
     }
 }
 

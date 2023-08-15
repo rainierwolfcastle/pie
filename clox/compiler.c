@@ -548,6 +548,30 @@ static void unary(bool can_assign) {
     }
 }
 
+static void list(bool can_assign) {
+    emit_byte(OP_NEW_LIST);
+
+    do {
+        if (match(TOKEN_RIGHT_BRACKET)) break;
+        expression();
+        emit_byte(OP_LIST_APPEND);
+    } while (match(TOKEN_COMMA));
+    
+    consume(TOKEN_RIGHT_BRACKET, "Expect ']' after array elements.");
+}
+
+static void subscript(bool can_assign) {
+    expression();
+    consume(TOKEN_RIGHT_BRACKET, "Expect ']' after arguments.");
+
+    if (can_assign && match(TOKEN_EQUAL)) {
+        expression();
+        emit_byte(OP_LIST_SUBSCRIPT_STORE);
+    } else {
+        emit_byte(OP_LIST_SUBSCRIPT_LOAD);
+    }
+}
+
 ParseRule rules[] = {
     [TOKEN_LEFT_PAREN]      = {grouping,    call,   PREC_CALL},
     [TOKEN_RIGHT_PAREN]     = {NULL,        NULL,   PREC_NONE},
@@ -589,6 +613,8 @@ ParseRule rules[] = {
     [TOKEN_WHILE]           = {NULL,        NULL,   PREC_NONE},
     [TOKEN_ERROR]           = {NULL,        NULL,   PREC_NONE},
     [TOKEN_EOF]             = {NULL,        NULL,   PREC_NONE},
+    [TOKEN_LEFT_BRACKET]    = {list,        subscript, PREC_CALL},
+    [TOKEN_RIGHT_BRACKET]   = {NULL,        NULL,   PREC_NONE},
 };
 
 static void parse_precedence(Precedence precedence) {
