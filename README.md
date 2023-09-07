@@ -25,3 +25,17 @@ Calculate the the 40th Fibonacci number using a recursive function. Times are ga
 [^1]: Final code from the book.
 [^2]: https://github.com/rainierwolfcastle/pie/tree/switch-dispatch-speedups
 [^3]: https://github.com/rainierwolfcastle/pie/tree/new-instructions
+
+### Sieve
+
+Find prime numbers up to 100,000,000. Times are gathered using hyperfine over five runs and are in seconds.
+
+| Type                                  | Avg (mean) | Std dev | Range (min) | Range (max) |
+| ------------------------------------- | ---------- | ------- | ----------- | ------------|
+| C                                     | 0.8714     | 0.0025  | 0.869       | 0.8753      |
+| Python                                | 11.143     | 0.091   | 11.021      | 11.233      |
+| Ruby                                  | 12.037     | 0.041   | 11.855      | 12.214      |
+| Clox [^1]                             | 10.940     | 0.007   | 10.895      | 11.004      |
+
+[^1]: Final code from the book with basic array support.
+
