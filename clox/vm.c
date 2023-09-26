@@ -513,9 +513,11 @@ static InterpretResult run(void) {
                 break;
             }
             case OP_LIST_APPEND: {
-                Value value = pop();
-                ObjList *list = AS_LIST(pop());
+                Value value = peek(0);
+                ObjList *list = AS_LIST(peek(1));
                 write_value_array(&list->values, value);
+                pop();
+                pop();
                 push(OBJ_VAL(list));
                 break;
             }
@@ -526,12 +528,31 @@ static InterpretResult run(void) {
                 break;
             }
             case OP_LIST_SUBSCRIPT_STORE: {
+                int index = AS_NUMBER(peek(1));
+                ObjList *list = AS_LIST(peek(2));
+                            
+                // Check if we're storing past the end of the list. Grow the
+                // array if we are.
+                if (index >= list->values.capacity) {
+                    int old_capacity = list->values.capacity;
+                    list->values.capacity = GROW_CAPACITY(old_capacity);
+                    list->values.values = GROW_ARRAY(Value, list->values.values, old_capacity, list->values.capacity);
+                }
+                
+                // adjust the count if needed.
+                if (index >= list->values.count) {
+                    list->values.count = index + 1;
+                }
+                
                 Value value = pop();
-                int index = AS_NUMBER(pop());
-                ObjList *list = AS_LIST(pop());
                 list->values.values[index] = value;
+                
+                pop();
+                pop();
+                
                 // Lox is expecting something to be on the stack.
                 push(value);
+                
                 break;
             }
         }
