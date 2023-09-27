@@ -194,6 +194,7 @@ Token scan_token(void) {
         case '<': return make_token(match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
         case '>': return make_token(match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
         case '"': return string();
+        case '%': return make_token(TOKEN_MOD);
     }
     
     return error_token("Unexpected character.");

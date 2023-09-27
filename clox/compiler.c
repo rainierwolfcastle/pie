@@ -412,6 +412,7 @@ static void binary(bool can_assign) {
         case TOKEN_MINUS:         emit_byte(OP_SUBTRACT); break;
         case TOKEN_STAR:          emit_byte(OP_MULTIPLY); break;
         case TOKEN_SLASH:         emit_byte(OP_DIVIDE); break;
+        case TOKEN_MOD:           emit_byte(OP_MOD); break;
         default: return; // unreachable
     }
 }
@@ -589,6 +590,7 @@ ParseRule rules[] = {
     [TOKEN_WHILE]           = {NULL,        NULL,   PREC_NONE},
     [TOKEN_ERROR]           = {NULL,        NULL,   PREC_NONE},
     [TOKEN_EOF]             = {NULL,        NULL,   PREC_NONE},
+    [TOKEN_MOD]             = {NULL,        binary, PREC_TERM},
 };
 
 static void parse_precedence(Precedence precedence) {
