@@ -160,5 +160,14 @@ void print_object(Value value) {
         case OBJ_UPVALUE:
             printf("upvalue");
             break;
+        case OBJ_TABLE:
+            printf("<table>");
+            break;
     }
+}
+
+ObjList* new_list(void) {
+    ObjList* list = ALLOCATE_OBJ(ObjList, OBJ_TABLE);
+    init_value_array(&list->elements);
+    return list;
 }

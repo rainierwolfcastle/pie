@@ -15,6 +15,7 @@
 #define IS_INSTANCE(value)     is_obj_type(value, OBJ_INSTANCE)
 #define IS_NATIVE(value)       is_obj_type(value, OBJ_NATIVE)
 #define IS_STRING(value)       is_obj_type(value, OBJ_STRING)
+#define IS_LIST(value)         is_obj_type(value, OBJ_TABLE)
 
 #define AS_BOUND_METHOD(value) ((ObjBoundMethod *) AS_OBJ(value))
 #define AS_CLASS(value)        ((ObjClass *) AS_OBJ(value))
@@ -24,6 +25,7 @@
 #define AS_NATIVE(value)       (((ObjNative *) AS_OBJ(value))->function)
 #define AS_STRING(value)       ((ObjString *) AS_OBJ(value))
 #define AS_CSTRING(value)      (((ObjString *) AS_OBJ(value))->chars)
+#define AS_LIST(value)         ((ObjList *) AS_OBJ(value))
 
 typedef enum {
     OBJ_BOUND_METHOD,
@@ -33,7 +35,8 @@ typedef enum {
     OBJ_INSTANCE,
     OBJ_NATIVE,
     OBJ_STRING,
-    OBJ_UPVALUE
+    OBJ_UPVALUE,
+    OBJ_TABLE,
 } ObjType;
 
 struct Obj {
@@ -96,6 +99,11 @@ typedef struct {
     ObjClosure *method;
 } ObjBoundMethod;
 
+typedef struct {
+    Obj obj;
+    ValueArray elements;
+} ObjList;
+
 ObjBoundMethod* new_bound_method(Value receiver, ObjClosure *method);
 ObjClass* new_class(ObjString *name);
 ObjClosure* new_closure(ObjFunction *function);
@@ -106,6 +114,7 @@ ObjString* take_string(char *chars, int length);
 ObjString* copy_string(const char *chars, int length);
 ObjUpvalue* new_upvalue(Value* slot);
 void print_object(Value v);
+ObjList* new_list(void);
 
 static inline bool is_obj_type(Value value, ObjType type) {
   return IS_OBJ(value) && AS_OBJ(value)->type == type;
