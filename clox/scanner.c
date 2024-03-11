@@ -133,7 +133,7 @@ static TokenType identifier_type(void) {
         case 'v': return check_keyword(1, 2, "ar", TOKEN_VAR);
         case 'w': return check_keyword(1, 4, "hile", TOKEN_WHILE);
     }
-    
+
     return TOKEN_IDENTIFIER;
 }
 
@@ -144,13 +144,13 @@ static Token identifier(void) {
 
 static Token number(void) {
     while (is_digit(peek())) advance();
-    
+
     if (peek() == '.' && is_digit(peek_next())) {
         advance();
-        
+
         while (is_digit(peek())) advance();
     }
-    
+
     return make_token(TOKEN_NUMBER);
 }
 
@@ -159,9 +159,9 @@ static Token string(void) {
         if (peek() == '\n') scanner.line++;
         advance();
     }
-    
+
     if (is_at_end()) return error_token("Unterminated string.");
-    
+
     advance();
     return make_token(TOKEN_STRING);
 }
@@ -169,14 +169,14 @@ static Token string(void) {
 Token scan_token(void) {
     skip_whitespace();
     scanner.start = scanner.current;
-    
+
     if (is_at_end()) return make_token(TOKEN_EOF);
-    
+
     char c = advance();
-    
+
     if (is_alpha(c)) return identifier();
     if (is_digit(c)) return number();
-    
+
     switch(c) {
         case '(': return make_token(TOKEN_LEFT_PAREN);
         case ')': return make_token(TOKEN_RIGHT_PAREN);
@@ -194,8 +194,10 @@ Token scan_token(void) {
         case '<': return make_token(match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
         case '>': return make_token(match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
         case '"': return string();
+        case '[': return make_token(TOKEN_LEFT_SQUARE_BRACKET);
+        case ']': return make_token(TOKEN_RIGHT_SQUARE_BRACKET);
         case '%': return make_token(TOKEN_MOD);
     }
-    
+
     return error_token("Unexpected character.");
 }

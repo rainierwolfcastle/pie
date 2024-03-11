@@ -16,6 +16,10 @@ static Value clock_native(int arg_count, Value *args) {
     return NUMBER_VAL((double) clock() / CLOCKS_PER_SEC);
 }
 
+static Value sqrt_native(int arg_count, Value *args) {
+    return NUMBER_VAL(sqrt(AS_NUMBER(args[0])));
+}
+
 static void reset_stack(void) {
     vm.stack_top = vm.stack;
     vm.frame_count = 0;
@@ -28,7 +32,7 @@ static void runtime_error(const char *format, ...) {
     vfprintf(stderr, format, args);
     va_end(args);
     fputs("\n", stderr);
-    
+
     for (int i = vm.frame_count - 1; i >= 0; i--) {
         CallFrame *frame = &vm.frames[i];
         ObjFunction *function = frame->closure->function;
@@ -40,7 +44,7 @@ static void runtime_error(const char *format, ...) {
             fprintf(stderr, "%s()\n", function->name->chars);
         }
     }
-    
+
     reset_stack();
 }
 
@@ -57,18 +61,19 @@ void init_vm(void) {
     vm.objects = NULL;
     vm.bytes_allocated = 0;
     vm.next_gc = 1024 * 1024;
-    
+
     vm.gray_count = 0;
     vm.gray_capacity = 0;
     vm.gray_stack = NULL;
-    
+
     init_table(&vm.globals);
     init_table(&vm.strings);
-    
+
     vm.init_string = NULL;
     vm.init_string = copy_string("init", 4);
-    
+
     define_native("clock", clock_native);
+    define_native("sqrt", sqrt_native);
 }
 
 void free_vm(void) {
@@ -97,12 +102,12 @@ static bool call(ObjClosure *closure, int arg_count) {
         runtime_error("Expected %d arguments but got %d.", closure->function->arity, arg_count);
         return false;
     }
-    
+
     if (vm.frame_count == FRAMES_MAX) {
         runtime_error("Stack overflow.");
         return false;
     }
-    
+
     CallFrame *frame = &vm.frames[vm.frame_count++];
     frame->closure = closure;
     frame->ip = closure->function->chunk.code;
@@ -143,7 +148,7 @@ static bool call_value(Value callee, int arg_count) {
                 break;
         }
     }
-    
+
     runtime_error("Can only call functions and classes.");
     return false;
 }
@@ -159,20 +164,20 @@ static bool invoke_from_class(ObjClass *klass, ObjString *name, int arg_count) {
 
 static bool invoke(ObjString *name, int arg_count) {
     Value receiver = peek(arg_count);
-    
+
     if (!IS_INSTANCE(receiver)) {
         runtime_error("Only instances have methods.");
         return false;
     }
-    
+
     ObjInstance *instance = AS_INSTANCE(receiver);
-    
+
     Value value;
     if (table_get(&instance->fields, name, &value)) {
         vm.stack_top[-arg_count - 1] = value;
         return call_value(value, arg_count);
     }
-    
+
     return invoke_from_class(instance->klass, name, arg_count);
 }
 
@@ -182,7 +187,7 @@ static bool bind_method(ObjClass *klass, ObjString *name) {
         runtime_error("Undefined property '%s'.", name->chars);
         return false;
     }
-    
+
     ObjBoundMethod *bound = new_bound_method(peek(0), AS_CLOSURE(method));
     pop();
     push(OBJ_VAL(bound));
@@ -196,20 +201,20 @@ static ObjUpvalue* capture_upvalue(Value *local) {
         prev_upvalue = upvalue;
         upvalue = upvalue->next;
     }
-    
+
     if (upvalue != NULL && upvalue->location == local) {
         return upvalue;
     }
-    
+
     ObjUpvalue *created_upvalue = new_upvalue(local);
     created_upvalue->next = upvalue;
-    
+
     if (prev_upvalue == NULL) {
         vm.open_upvalues = created_upvalue;
     } else {
         prev_upvalue->next = created_upvalue;
     }
-    
+
     return created_upvalue;
 }
 
@@ -236,13 +241,13 @@ static bool is_falsey(Value v) {
 static void concatinate(void) {
     ObjString *b = AS_STRING(peek(0));
     ObjString *a = AS_STRING(peek(1));
-    
+
     int length = a->length + b->length;
     char *chars = ALLOCATE(char, length + 1);
     memcpy(chars, a->chars, a->length);
     memcpy(chars + a->length, b->chars, b->length);
     chars[length] = '\0';
-    
+
     ObjString *result = take_string(chars, length);
     pop();
     pop();
@@ -251,7 +256,7 @@ static void concatinate(void) {
 
 static InterpretResult run(void) {
     CallFrame *frame = &vm.frames[vm.frame_count - 1];
-    
+
 #define READ_BYTE() (*frame->ip++)
 #define READ_SHORT() (frame->ip += 2, (uint16_t)((frame->ip[-2] << 8) | frame->ip[-1]))
 #define READ_CONSTANT() (frame->closure->function->chunk.constants.values[READ_BYTE()])
@@ -339,17 +344,17 @@ static InterpretResult run(void) {
                     runtime_error("Only instances have properties.");
                     return INTERPRET_RUNTIME_ERROR;
                 }
-                
+
                 ObjInstance *instance = AS_INSTANCE(peek(0));
                 ObjString *name = READ_STRING();
-                
+
                 Value value;
                 if (table_get(&instance->fields, name, &value)) {
                     pop();
                     push(value);
                     break;
                 }
-                
+
                 if (!bind_method(instance->klass, name)) {
                     return INTERPRET_RUNTIME_ERROR;
                 }
@@ -360,7 +365,7 @@ static InterpretResult run(void) {
                     runtime_error("Only instances have fields.");
                     return INTERPRET_RUNTIME_ERROR;
                 }
-                
+
                 ObjInstance *instance = AS_INSTANCE(peek(1));
                 table_set(&instance->fields, READ_STRING(), peek(0));
                 Value value = pop();
@@ -371,7 +376,7 @@ static InterpretResult run(void) {
             case OP_GET_SUPER: {
                 ObjString *name = READ_STRING();
                 ObjClass *superclass = AS_CLASS(pop());
-                
+
                 if (!bind_method(superclass, name)) {
                     return INTERPRET_RUNTIME_ERROR;
                 }
@@ -460,7 +465,7 @@ static InterpretResult run(void) {
                 ObjFunction *function = AS_FUNCTION(READ_CONSTANT());
                 ObjClosure *closure = new_closure(function);
                 push(OBJ_VAL(closure));
-                
+
                 for (int i = 0; i < closure->upvalue_count; i++) {
                     uint8_t is_local = READ_BYTE();
                     uint8_t index = READ_BYTE();
@@ -484,7 +489,7 @@ static InterpretResult run(void) {
                     pop();
                     return INTERPRET_OK;
                 }
-                
+
                 vm.stack_top = frame->slots;
                 push(result);
                 frame = &vm.frames[vm.frame_count - 1];
@@ -499,7 +504,7 @@ static InterpretResult run(void) {
                     runtime_error("Superclass must be a class.");
                     return INTERPRET_RUNTIME_ERROR;
                 }
-                
+
                 ObjClass *subclass = AS_CLASS(peek(0));
                 table_add_all(&AS_CLASS(superclass)->methods, &subclass->methods);
                 pop();
@@ -508,6 +513,29 @@ static InterpretResult run(void) {
             case OP_METHOD:
                 define_method(READ_STRING());
                 break;
+            case OP_NEW_LIST:
+                push(OBJ_VAL(new_list()));
+                break;
+            case OP_GET_LIST: {
+                int index = (int) AS_NUMBER(pop());
+                ObjList *list = AS_LIST(pop());
+                push(list->elements.values[index]);
+                break;
+            }
+            case OP_SET_LIST: {
+                Value value = pop();
+                int index = (int) AS_NUMBER(pop());
+                ObjList *list = AS_LIST(pop());
+
+                if (index < list->elements.count) {
+                    list->elements.values[index] = value;
+                } else {
+                    write_value_array(&list->elements, value);
+                }
+
+                push(OBJ_VAL(list));
+                break;
+            }
             case OP_MOD: {
                 if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) {
                     runtime_error("Operands must be numbers.");
@@ -531,12 +559,12 @@ static InterpretResult run(void) {
 InterpretResult interpret(const char *source) {
     ObjFunction *function = compile(source);
     if (function == NULL) return INTERPRET_COMPILE_ERROR;
-    
+
     push(OBJ_VAL(function));
     ObjClosure *closure = new_closure(function);
     pop();
     push(OBJ_VAL(closure));
     call(closure, 0);
-    
+
     return run();
 }
