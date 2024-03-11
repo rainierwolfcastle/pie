@@ -446,6 +446,32 @@ static void literal(bool can_assign) {
     }
 }
 
+static void list(bool can_assign) {
+    emit_byte(OP_NEW_LIST);
+
+    double index = 0;
+    do {
+        if (check(TOKEN_RIGHT_SQUARE_BRACKET)) break;
+        emit_constant(NUMBER_VAL(index++));
+        expression();
+        emit_byte(OP_SET_LIST);
+    } while (match(TOKEN_COMMA));
+
+    consume(TOKEN_RIGHT_SQUARE_BRACKET, "Expect ']' after list elements.");
+}
+
+static void subscript(bool can_assign) {
+    expression();
+    consume(TOKEN_RIGHT_SQUARE_BRACKET, "Expect ']' after arguments.");
+    
+    if (can_assign && match(TOKEN_EQUAL)) {
+        expression();
+        emit_byte(OP_SET_LIST);
+    } else {
+        emit_byte(OP_GET_LIST);
+    }
+}
+
 static void grouping(bool can_assign) {
     expression();
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
@@ -549,46 +575,48 @@ static void unary(bool can_assign) {
 }
 
 ParseRule rules[] = {
-    [TOKEN_LEFT_PAREN]      = {grouping,    call,   PREC_CALL},
-    [TOKEN_RIGHT_PAREN]     = {NULL,        NULL,   PREC_NONE},
-    [TOKEN_LEFT_BRACE]      = {NULL,        NULL,   PREC_NONE},
-    [TOKEN_RIGHT_BRACE]     = {NULL,        NULL,   PREC_NONE},
-    [TOKEN_COMMA]           = {NULL,        NULL,   PREC_NONE},
-    [TOKEN_DOT]             = {NULL,        dot,    PREC_CALL},
-    [TOKEN_MINUS]           = {unary,       binary, PREC_TERM},
-    [TOKEN_PLUS]            = {NULL,        binary, PREC_TERM},
-    [TOKEN_SEMICOLON]       = {NULL,        NULL,   PREC_NONE},
-    [TOKEN_SLASH]           = {NULL,        binary, PREC_FACTOR},
-    [TOKEN_STAR]            = {NULL,        binary, PREC_FACTOR},
-    [TOKEN_BANG]            = {unary,       NULL,   PREC_NONE},
-    [TOKEN_BANG_EQUAL]      = {NULL,        binary, PREC_EQUALITY},
-    [TOKEN_EQUAL]           = {NULL,        NULL,   PREC_NONE},
-    [TOKEN_EQUAL_EQUAL]     = {NULL,        binary, PREC_EQUALITY},
-    [TOKEN_GREATER]         = {NULL,        binary, PREC_COMPARISION},
-    [TOKEN_GREATER_EQUAL]   = {NULL,        binary, PREC_COMPARISION},
-    [TOKEN_LESS]            = {NULL,        binary, PREC_COMPARISION},
-    [TOKEN_LESS_EQUAL]      = {NULL,        binary, PREC_COMPARISION},
-    [TOKEN_IDENTIFIER]      = {variable,    NULL,   PREC_NONE},
-    [TOKEN_STRING]          = {string,      NULL,   PREC_NONE},
-    [TOKEN_NUMBER]          = {number,      NULL,   PREC_NONE},
-    [TOKEN_AND]             = {NULL,        and_,   PREC_AND},
-    [TOKEN_CLASS]           = {NULL,        NULL,   PREC_NONE},
-    [TOKEN_ELSE]            = {NULL,        NULL,   PREC_NONE},
-    [TOKEN_FALSE]           = {literal,     NULL,   PREC_NONE},
-    [TOKEN_FOR]             = {NULL,        NULL,   PREC_NONE},
-    [TOKEN_FUN]             = {NULL,        NULL,   PREC_NONE},
-    [TOKEN_IF]              = {NULL,        NULL,   PREC_NONE},
-    [TOKEN_NIL]             = {literal,     NULL,   PREC_NONE},
-    [TOKEN_OR]              = {NULL,        or_,    PREC_OR},
-    [TOKEN_PRINT]           = {NULL,        NULL,   PREC_NONE},
-    [TOKEN_RETURN]          = {NULL,        NULL,   PREC_NONE},
-    [TOKEN_SUPER]           = {super_,      NULL,   PREC_NONE},
-    [TOKEN_THIS]            = {this_,       NULL,   PREC_NONE},
-    [TOKEN_TRUE]            = {literal,     NULL,   PREC_NONE},
-    [TOKEN_VAR]             = {NULL,        NULL,   PREC_NONE},
-    [TOKEN_WHILE]           = {NULL,        NULL,   PREC_NONE},
-    [TOKEN_ERROR]           = {NULL,        NULL,   PREC_NONE},
-    [TOKEN_EOF]             = {NULL,        NULL,   PREC_NONE},
+    [TOKEN_LEFT_PAREN]           = {grouping,    call,      PREC_CALL},
+    [TOKEN_RIGHT_PAREN]          = {NULL,        NULL,      PREC_NONE},
+    [TOKEN_LEFT_BRACE]           = {NULL,        NULL,      PREC_NONE},
+    [TOKEN_RIGHT_BRACE]          = {NULL,        NULL,      PREC_NONE},
+    [TOKEN_COMMA]                = {NULL,        NULL,      PREC_NONE},
+    [TOKEN_DOT]                  = {NULL,        dot,       PREC_CALL},
+    [TOKEN_MINUS]                = {unary,       binary,    PREC_TERM},
+    [TOKEN_PLUS]                 = {NULL,        binary,    PREC_TERM},
+    [TOKEN_SEMICOLON]            = {NULL,        NULL,      PREC_NONE},
+    [TOKEN_SLASH]                = {NULL,        binary,    PREC_FACTOR},
+    [TOKEN_STAR]                 = {NULL,        binary,    PREC_FACTOR},
+    [TOKEN_BANG]                 = {unary,       NULL,      PREC_NONE},
+    [TOKEN_BANG_EQUAL]           = {NULL,        binary,    PREC_EQUALITY},
+    [TOKEN_EQUAL]                = {NULL,        NULL,      PREC_NONE},
+    [TOKEN_EQUAL_EQUAL]          = {NULL,        binary,    PREC_EQUALITY},
+    [TOKEN_GREATER]              = {NULL,        binary,    PREC_COMPARISION},
+    [TOKEN_GREATER_EQUAL]        = {NULL,        binary,    PREC_COMPARISION},
+    [TOKEN_LESS]                 = {NULL,        binary,    PREC_COMPARISION},
+    [TOKEN_LESS_EQUAL]           = {NULL,        binary,    PREC_COMPARISION},
+    [TOKEN_IDENTIFIER]           = {variable,    NULL,      PREC_NONE},
+    [TOKEN_STRING]               = {string,      NULL,      PREC_NONE},
+    [TOKEN_NUMBER]               = {number,      NULL,      PREC_NONE},
+    [TOKEN_AND]                  = {NULL,        and_,      PREC_AND},
+    [TOKEN_CLASS]                = {NULL,        NULL,      PREC_NONE},
+    [TOKEN_ELSE]                 = {NULL,        NULL,      PREC_NONE},
+    [TOKEN_FALSE]                = {literal,     NULL,      PREC_NONE},
+    [TOKEN_FOR]                  = {NULL,        NULL,      PREC_NONE},
+    [TOKEN_FUN]                  = {NULL,        NULL,      PREC_NONE},
+    [TOKEN_IF]                   = {NULL,        NULL,      PREC_NONE},
+    [TOKEN_NIL]                  = {literal,     NULL,      PREC_NONE},
+    [TOKEN_OR]                   = {NULL,        or_,       PREC_OR},
+    [TOKEN_PRINT]                = {NULL,        NULL,      PREC_NONE},
+    [TOKEN_RETURN]               = {NULL,        NULL,      PREC_NONE},
+    [TOKEN_SUPER]                = {super_,      NULL,      PREC_NONE},
+    [TOKEN_THIS]                 = {this_,       NULL,      PREC_NONE},
+    [TOKEN_TRUE]                 = {literal,     NULL,      PREC_NONE},
+    [TOKEN_VAR]                  = {NULL,        NULL,      PREC_NONE},
+    [TOKEN_WHILE]                = {NULL,        NULL,      PREC_NONE},
+    [TOKEN_ERROR]                = {NULL,        NULL,      PREC_NONE},
+    [TOKEN_EOF]                  = {NULL,        NULL,      PREC_NONE},
+    [TOKEN_LEFT_SQUARE_BRACKET]  = {list,       subscript, PREC_CALL},
+    [TOKEN_RIGHT_SQUARE_BRACKET] = {NULL,        NULL,      PREC_NONE},
 };
 
 static void parse_precedence(Precedence precedence) {

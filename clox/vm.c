@@ -507,6 +507,29 @@ static InterpretResult run(void) {
             case OP_METHOD:
                 define_method(READ_STRING());
                 break;
+            case OP_NEW_LIST:
+                push(OBJ_VAL(new_list()));
+                break;
+            case OP_GET_LIST: {
+                int index = (int) AS_NUMBER(pop());
+                ObjList *list = AS_LIST(pop());
+                push(list->elements.values[index]);
+                break;
+            }
+            case OP_SET_LIST: {
+                Value value = pop();
+                int index = (int) AS_NUMBER(pop());
+                ObjList *list = AS_LIST(pop());
+                
+                if (index < list->elements.count) {
+                    list->elements.values[index] = value;
+                } else {
+                    write_value_array(&list->elements, value);
+                }
+                
+                push(OBJ_VAL(list));
+                break;
+            }
         }
     }
 
