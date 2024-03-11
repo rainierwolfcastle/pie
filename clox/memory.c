@@ -112,8 +112,8 @@ static void blacken_object(Obj *object) {
         case OBJ_STRING:
             break;
         case OBJ_LIST: {
-            ObjList *table = (ObjList *) object;
-            mark_array(&table->elements);
+            ObjList *list = (ObjList *) object;
+            mark_array(&list->elements);
             break;
         }
     }
@@ -167,8 +167,8 @@ static void free_object(Obj *object) {
             break;
         }
         case OBJ_LIST: {
-            ObjList *table = (ObjList *) object;
-            free_value_array(&table->elements);
+            ObjList *list = (ObjList *) object;
+            free_value_array(&list->elements);
             FREE(ObjList, object);
             break;
         }
