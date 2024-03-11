@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
 
 #include "compiler.h"
 #include "common.h"
@@ -13,6 +14,10 @@ Vm vm;
 
 static Value clock_native(int arg_count, Value *args) {
     return NUMBER_VAL((double) clock() / CLOCKS_PER_SEC);
+}
+
+static Value sqrt_native(int arg_count, Value *args) {
+    return NUMBER_VAL(sqrt(AS_NUMBER(args[0])));
 }
 
 static void reset_stack(void) {
@@ -68,6 +73,7 @@ void init_vm(void) {
     vm.init_string = copy_string("init", 4);
     
     define_native("clock", clock_native);
+    define_native("sqrt", sqrt_native);
 }
 
 void free_vm(void) {
