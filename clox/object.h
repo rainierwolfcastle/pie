@@ -15,7 +15,7 @@
 #define IS_INSTANCE(value)     is_obj_type(value, OBJ_INSTANCE)
 #define IS_NATIVE(value)       is_obj_type(value, OBJ_NATIVE)
 #define IS_STRING(value)       is_obj_type(value, OBJ_STRING)
-#define IS_LIST(value)         is_obj_type(value, OBJ_TABLE)
+#define IS_LIST(value)         is_obj_type(value, OBJ_LIST)
 
 #define AS_BOUND_METHOD(value) ((ObjBoundMethod *) AS_OBJ(value))
 #define AS_CLASS(value)        ((ObjClass *) AS_OBJ(value))
@@ -36,7 +36,7 @@ typedef enum {
     OBJ_NATIVE,
     OBJ_STRING,
     OBJ_UPVALUE,
-    OBJ_TABLE,
+    OBJ_LIST,
 } ObjType;
 
 struct Obj {
