@@ -196,6 +196,7 @@ Token scan_token(void) {
         case '"': return string();
         case '[': return make_token(TOKEN_LEFT_SQUARE_BRACKET);
         case ']': return make_token(TOKEN_RIGHT_SQUARE_BRACKET);
+        case '%': return make_token(TOKEN_MOD);
     }
     
     return error_token("Unexpected character.");

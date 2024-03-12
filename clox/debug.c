@@ -151,6 +151,8 @@ int disassemble_instruction(Chunk *chunk, int offset) {
             return simple_instruction("OP_GET_LIST", offset);
         case OP_SET_LIST:
             return simple_instruction("OP_SET_LIST", offset);
+        case OP_MOD:
+            return simple_instruction("OP_MOD", offset);
         default:
             printf("Unknown opcode %d\n", instruction);
             return offset + 1;

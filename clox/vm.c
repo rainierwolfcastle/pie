@@ -536,6 +536,16 @@ static InterpretResult run(void) {
                 push(OBJ_VAL(list));
                 break;
             }
+            case OP_MOD: {
+                if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) {
+                    runtime_error("Operands must be numbers.");
+                    return INTERPRET_RUNTIME_ERROR; \
+                }
+                double b = AS_NUMBER(pop());
+                double a = AS_NUMBER(pop());
+                push(NUMBER_VAL(fmod(a, b)));
+                break;
+            }
         }
     }
 
